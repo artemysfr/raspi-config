@@ -101,7 +101,7 @@ p
 w
 EOF
     mkfs.ext4 -L "BOOT" -F /dev/mmcblk2p1 &&
-    mkfs.ext4 -L "ROOTFS" -F /dev/mmcblk2p1
+    mkfs.ext4 -L "ROOTFS" -F /dev/mmcblk2p2
     if [ "$create_home" == "y" ]; then
       mkfs.ext4 -L "HOME" -F /dev/mmcblk2p3
     fi
