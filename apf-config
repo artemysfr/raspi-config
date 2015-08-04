@@ -47,7 +47,7 @@ It is heavily based on raspi-config.\
 
 do_expand_rootfs() {
   if ! [ -h /dev/root ]; then
-    whiptail --msgbox "I assume you're running in failsafe mode and will expand APF6 EMMC." 20 60 2
+    whiptail --msgbox "I assume you're running in failsafe mode and will expand APF6 eMMC Boot and Rootfs partitions" 20 60 2
     ROOT_PART=mmcblk2p2
   else
     ROOT_PART=$(readlink /dev/root)
@@ -60,9 +60,17 @@ do_expand_rootfs() {
   fi
 
   resize2fs /dev/$ROOT_PART
-  if [ "$INTERACTIVE" = True ]; then
-    whiptail --msgbox "Root filesystem has been resized to fill partition.\n" 20 60 2
+  if [ "$ROOT_PART" == mmcblk2p2 ]; then
+    # also resize Boot partition of eMMC
+    resize2fs /dev/mmcblk2p1
   fi
+
+  RES="$?"
+  if [ "$INTERACTIVE" = True ] && [ "$RES" -eq 0 ]; then
+    whiptail --msgbox "Filesystem(s) has(have) been resized to fill partition(s).\n" 20 60 2
+  fi
+
+  return $RES
 }
 
 do_check_emmc() {
@@ -966,13 +974,13 @@ do_failsafe_menu() {
   fi
 }
 
-#
+
 # Interactive use loop
 #
 calc_wt_size
 while true; do
   FUN=$(whiptail --title "APF6 Software Configuration Tool (apf-config)" --menu "Setup Options" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Finish --ok-button Select \
-    "1 Expand Filesystem" "OS can then use all eMMC/SD space" \
+    "1 Expand Filesystem(s)" "OS can then use all eMMC/SD space" \
     "2 Change User Password" "Change default user password" \
     "3 Enable Boot to Desktop" "(Debian only)" \
     "4 Internationalisation Options" "Set up language/regional settings" \
