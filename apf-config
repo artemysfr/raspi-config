@@ -110,10 +110,11 @@ w
 EOF
     mkfs.ext4 -L "BOOT" -F /dev/mmcblk2p1 &&
     mkfs.ext4 -L "ROOTFS" -F /dev/mmcblk2p2
+    RET=$?
     if [ "$create_home" == "y" ]; then
       mkfs.ext4 -L "HOME" -F /dev/mmcblk2p3
     fi
-    if [ "$?" -eq 0 ]; then
+    if [ "$RET" -eq 0 ]; then
       whiptail --msgbox "Your eMMC have been successfully formatted !" 20 60 2
     else
       return 1
