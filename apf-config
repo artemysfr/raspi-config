@@ -89,6 +89,24 @@ do_check_emmc() {
   fi
 }
 
+do_clear_emmc() {
+  if [ -h /dev/root ]; then
+    whiptail --msgbox "Can only be run in failsafe mode." 20 60 2
+    return 0
+  fi
+
+  whiptail --yesno "This will completly erase your APF6 eMMC and may take up to 15 mins !" 20 60 2 \
+    --yes-button Ok --no-button Cancel
+  RET=$?
+  if [ "$RET" -eq 0 ]; then
+    # 7680000 should be 7733248 but seems to much
+    dd if=/dev/zero bs=512 count=7680000 | pv | dd of=/dev/mmcblk2 &&
+    whiptail --msgbox "Your eMMC have been successfully filled with zeroes !" 20 60 2
+    RET=$?
+  fi
+  return $RET
+}
+
 do_format_emmc() {
   whiptail --yesno "This will erase all the content of your APF6 eMMC !" 20 60 2 \
     --yes-button Ok --no-button Cancel
@@ -964,6 +982,7 @@ do_failsafe_menu() {
   FUN=$(whiptail --title "APF6 Software Configuration Tool (apf-config)" --menu "Failsafe actions" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Back --ok-button Select \
     "F1 Check eMMC" "Check for errors in ext4 filesystems" \
     "F2 Format eMMC" "Needed after a recover" \
+    "F3 Fill eMMC with zeroes" "To have a brand new clean eMMC" \
     3>&1 1>&2 2>&3)
   RET=$?
   if [ $RET -eq 1 ]; then
@@ -972,6 +991,7 @@ do_failsafe_menu() {
     case "$FUN" in
       F1\ *) do_check_emmc ;;
       F2\ *) do_format_emmc ;;
+      F3\ *) do_clear_emmc ;;
       *) whiptail --msgbox "Programmer error: unrecognized option" 20 60 1 ;;
     esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
   fi
