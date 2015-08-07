@@ -108,6 +108,8 @@ p
 
 w
 EOF
+    # Force re-read of partition table
+    sleep 3 && hdparm -z /dev/mmcblk2
     mkfs.ext4 -L "BOOT" -F /dev/mmcblk2p1 &&
     mkfs.ext4 -L "ROOTFS" -F /dev/mmcblk2p2
     RET=$?
