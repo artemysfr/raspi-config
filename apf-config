@@ -74,7 +74,7 @@ do_expand_rootfs() {
 }
 
 do_check_emmc() {
-  if ! [ -h /dev/root ]; then
+  if [ -h /dev/root ]; then
     whiptail --msgbox "Can only be run in failsafe mode." 20 60 2
     return 0
   fi
@@ -82,7 +82,7 @@ do_check_emmc() {
   whiptail --yesno "This may alter the content of your APF6 eMMC !" 20 60 2 \
     --yes-button Ok --no-button Cancel
   RET=$?
-  if [ $RET -eq 0 ]; then
+  if [ "$RET" -eq 0 ]; then
     e2fsck /dev/mmcblk2p1 &&
     e2fsck /dev/mmcblk2p2 &&
     whiptail --msgbox "Your eMMC have been successfully checked !" 20 60 2
